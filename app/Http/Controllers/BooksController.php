@@ -81,11 +81,25 @@ class BooksController extends Controller
      */
     public function update(UpdateBooksRequest $request, $id)
     {
+        $imagePath = '';
+        // If $request->cover_image is not null, upload new cover image
+        if ($request->cover_image) {
+            $coverImage = $request->file('cover_image');
+            $coverImageName = time() . '.' . $coverImage->extension();
+            $coverImage->move(public_path('images'), $coverImageName);
+            $imagePath = 'images/' . $coverImageName;
+        }
+
+        if ($imagePath == '') {
+            $book = Books::find($id);
+            $imagePath = $book->cover_image;
+        }
+
         $data = [
             'title' => $request->title,
             'author' => $request->author,
             'isbn' => $request->isbn,
-            'cover_image' => $request->cover_image,
+            'cover_image' => $imagePath,
             'description' => $request->description,
             'pages' => $request->pages,
             'publisher' => $request->publisher,
